@@ -11,6 +11,15 @@ PLANS = {'Free': 0.08, 'Pro': 0.05, 'Business': 0.03}
 PLAN_NAMES = ['Free', 'Pro', 'Business']
 MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 STATUSES = ['Approved', 'Pending', 'Flagged', 'Featured']
+THEME = '#176b87'
+OK_GREEN = '#1a7f4b'
+BAD_RED = '#b3372f'
+WARN_ORANGE = '#c2620a'
+BG_PAID = '#eaf6ee'
+BG_DUE = '#fdf3e6'
+BG_OVERDUE = '#fdeaea'
+NAV_PAGES = ['Dashboard', 'Organizers', 'Events', 'Reports', 'Audit log', 'Settings']
+ICONS = {'Dashboard': 'fa:dashboard', 'Organizers': 'fa:users', 'Events': 'fa:calendar', 'Reports': 'fa:file-text-o', 'Audit log': 'fa:history', 'Settings': 'fa:cog'}
 _ORGS = [('Bangkok Runners Club', 'Pro', 'Active'), ('MUIC Music Society', 'Free', 'Active'), ('TechConf Asia', 'Business', 'Active'), ('Chiang Mai Food Fest', 'Pro', 'Active'), ('Indie Game Meetup', 'Free', 'Suspended')]
 _EVENTS = [('E001', 'Sunday Half Marathon', 'Bangkok Runners Club', 4, 12, 320, 450), ('E002', 'Night Trail 10K', 'Bangkok Runners Club', 5, 17, 210, 500), ('E003', 'Riverside Fun Run', 'Bangkok Runners Club', 6, 14, 180, 350), ('E004', 'Spring Recital', 'MUIC Music Society', 4, 26, 90, 200), ('E005', 'Jazz Night', 'MUIC Music Society', 6, 6, 140, 250), ('E006', 'Cloud and AI Summit', 'TechConf Asia', 5, 8, 640, 1800), ('E007', 'DevOps Workshop', 'TechConf Asia', 6, 19, 120, 2500), ('E008', 'Street Food Festival', 'Chiang Mai Food Fest', 4, 5, 850, 150), ('E009', 'Craft Beer and BBQ', 'Chiang Mai Food Fest', 5, 24, 430, 300), ('E010', 'Northern Coffee Fair', 'Chiang Mai Food Fest', 6, 21, 510, 180), ('E011', 'Indie Showcase Vol.4', 'Indie Game Meetup', 4, 30, 160, 120), ('E012', 'Retro Arcade Night', 'Indie Game Meetup', 5, 29, 110, 150)]
 
@@ -135,7 +144,7 @@ class Form1(Form1Template):
     self.tb_pass.set_event_handler('pressed_enter', self._do_login)
     card.add_component(self.tb_user)
     card.add_component(self.tb_pass)
-    btn = Button(text='Log in', role='primary-color', spacing_above='small')
+    btn = Button(text='Log in', icon='fa:sign-in', role='primary-color', spacing_above='small')
     btn.set_event_handler('click', self._do_login)
     card.add_component(btn)
     card.add_component(Label(text='Demo login  ->  username: admin   password: admin123', foreground='#6b6975', spacing_above='small'))
@@ -164,14 +173,15 @@ class Form1(Form1Template):
 
   def _draw_nav(self, current):
     self.nav.clear()
-    for name in ['Dashboard', 'Organizers', 'Events', 'Reports', 'Audit log', 'Settings']:
+    for name in NAV_PAGES:
       if name == current:
-        self.nav.add_component(Label(text='* ' + name, bold=True, foreground='#5b45d4'))
+        b = Button(text=name, icon=ICONS[name], role='primary-color')
+        self.nav.add_component(b)
       else:
-        link = Link(text=name)
+        link = Link(text=name, icon=ICONS[name])
         link.set_event_handler('click', partial(self._refresh, name))
         self.nav.add_component(link)
-    out = Link(text='|  Log out')
+    out = Link(text='Log out', icon='fa:sign-out')
     out.set_event_handler('click', self._logout)
     self.nav.add_component(out)
 
@@ -210,9 +220,9 @@ class Form1(Form1Template):
     overdue = [o for o in self.orgs if self._overdue_of(o['name']) > 0]
     if overdue:
       alert = ColumnPanel(role='card', spacing_below='medium')
-      alert.add_component(Label(text='! Overdue invoices need attention', bold=True, font_size=16, foreground='#b3372f'))
+      alert.add_component(Label(text='! Overdue invoices need attention', bold=True, font_size=16, foreground=BAD_RED))
       for o in overdue:
-        alert.add_component(Label(text='%s  -  overdue THB %s  (%s)' % (o['name'], '{:,.0f}'.format(self._overdue_of(o['name'])), o['status']), foreground='#b3372f'))
+        alert.add_component(Label(text='%s  -  overdue THB %s  (%s)' % (o['name'], '{:,.0f}'.format(self._overdue_of(o['name'])), o['status']), foreground=BAD_RED))
       self.content.add_component(alert)
     gmv = sum([e['gmv'] for e in evs])
     earned = sum([i['commission'] for i in invs])
@@ -238,7 +248,7 @@ class Form1(Form1Template):
       rowp = FlowPanel(align='left')
       for (cap, val) in items:
         c = ColumnPanel(role='card')
-        c.add_component(Label(text=val, font_size=22, bold=True))
+        c.add_component(Label(text=val, font_size=22, bold=True, foreground=THEME))
         c.add_component(Label(text=cap, foreground='#6b6975'))
         rowp.add_component(c)
       self.content.add_component(rowp)
@@ -255,13 +265,13 @@ class Form1(Form1Template):
     try:
       import plotly.graph_objs as go
       p1 = Plot()
-      p1.data = [go.Bar(x=[k for (k, v) in pairs], y=[v for (k, v) in pairs], marker={'color': '#5b45d4'})]
+      p1.data = [go.Bar(x=[k for (k, v) in pairs], y=[v for (k, v) in pairs], marker={'color': THEME})]
       p1.layout.height = 320
       p1.layout.title = 'Commission earned by organizer (THB)'
       p1.layout.margin = {'t': 40, 'b': 120, 'l': 70, 'r': 20}
       self.content.add_component(p1)
       p2 = Plot()
-      p2.data = [go.Scatter(x=[k for (k, v) in mpairs], y=[v for (k, v) in mpairs], mode='lines+markers', line={'color': '#1a7f4b', 'width': 3})]
+      p2.data = [go.Scatter(x=[k for (k, v) in mpairs], y=[v for (k, v) in mpairs], mode='lines+markers', line={'color': OK_GREEN, 'width': 3})]
       p2.layout.height = 300
       p2.layout.title = 'Monthly commission trend (THB)'
       p2.layout.margin = {'t': 40, 'b': 60, 'l': 70, 'r': 20}
@@ -277,20 +287,20 @@ class Form1(Form1Template):
     self.tb_org = TextBox(text=self.org_search, placeholder='organizer name')
     self.tb_org.set_event_handler('pressed_enter', self._org_search_go)
     bar.add_component(self.tb_org)
-    b = Button(text='Go')
+    b = Button(text='Go', icon='fa:search')
     b.set_event_handler('click', self._org_search_go)
     bar.add_component(b)
     bar.add_component(Label(text='  Sort by:'))
     dd = DropDown(items=['GMV', 'Commission due', 'Name'], selected_value=self.org_sort)
     dd.set_event_handler('change', self._org_sort_changed)
     bar.add_component(dd)
-    badd = Button(text='+ Add organizer', role='primary-color')
+    badd = Button(text='Add organizer', icon='fa:plus', role='primary-color')
     badd.set_event_handler('click', self._toggle_add_org)
     bar.add_component(badd)
-    bcsv = Button(text='Export organizers CSV')
+    bcsv = Button(text='Export organizers CSV', icon='fa:download')
     bcsv.set_event_handler('click', self._export_orgs)
     bar.add_component(bcsv)
-    bauto = Button(text='Auto-suspend overdue', role='secondary-color')
+    bauto = Button(text='Auto-suspend overdue', icon='fa:ban', role='secondary-color')
     bauto.set_event_handler('click', self._auto_suspend)
     bar.add_component(bauto)
     self.content.add_component(bar)
@@ -303,10 +313,10 @@ class Form1(Form1Template):
       row.add_component(Label(text='Plan:'))
       self.dd_new_plan = DropDown(items=PLAN_NAMES, selected_value='Pro')
       row.add_component(self.dd_new_plan)
-      s = Button(text='Save', role='primary-color')
+      s = Button(text='Save', icon='fa:check', role='primary-color')
       s.set_event_handler('click', self._save_new_org)
       row.add_component(s)
-      c = Button(text='Cancel')
+      c = Button(text='Cancel', icon='fa:times')
       c.set_event_handler('click', self._toggle_add_org)
       row.add_component(c)
       box.add_component(row)
@@ -328,12 +338,19 @@ class Form1(Form1Template):
     due = self._due_of(o['name'])
     od = self._overdue_of(o['name'])
     inv = self._invoices_of(o['name'])
-    card = ColumnPanel(role='card', spacing_below='small')
-    title = Link(text='%s   (%s plan - %.0f%% commission)   >' % (o['name'], o['plan'], o['rate'] * 100))
+    bg = None
+    if od > 0:
+      bg = BG_OVERDUE
+    elif due > 0:
+      bg = BG_DUE
+    elif o['status'] == 'Active':
+      bg = BG_PAID
+    card = ColumnPanel(role='card', spacing_below='small', background=bg)
+    title = Link(text='%s   (%s plan - %.0f%% commission)   >' % (o['name'], o['plan'], o['rate'] * 100), bold=True, font_size=16)
     title.set_event_handler('click', partial(self._open_org, o['name']))
     card.add_component(title)
     if od > 0:
-      card.add_component(Label(text='! OVERDUE THB ' + '{:,.0f}'.format(od), bold=True, foreground='#b3372f'))
+      card.add_component(Label(text='! OVERDUE THB ' + '{:,.0f}'.format(od), bold=True, foreground=BAD_RED))
     card.add_component(Label(text='%d events  -  %s participants  -  GMV THB %s  -  commission due THB %s' % (len(mine), '{:,}'.format(sum([e['participants'] for e in mine])), '{:,.0f}'.format(sum([e['gmv'] for e in mine])), '{:,.0f}'.format(due)), foreground='#6b6975'))
     paid_n = len([i for i in inv if i['status'] == 'Paid'])
     last_str = 'no events yet'
@@ -342,21 +359,21 @@ class Form1(Form1Template):
       last_str = '%s (%s)' % (last['title'], last['date_str'])
     card.add_component(Label(text='%d invoice(s): %d paid / %d unpaid   |   latest event: %s' % (len(inv), paid_n, len(inv) - paid_n, last_str), foreground='#8a8894'))
     row = FlowPanel(align='left')
-    row.add_component(Label(text='Status: ' + o['status'], bold=True, foreground='#1a7f4b' if o['status'] == 'Active' else '#b3372f'))
+    row.add_component(Label(text='Status: ' + o['status'], bold=True, foreground=OK_GREEN if o['status'] == 'Active' else BAD_RED))
     row.add_component(Label(text='  Plan:'))
     ddp = DropDown(items=PLAN_NAMES, selected_value=o['plan'])
     ddp.set_event_handler('change', partial(self._change_plan, o))
     row.add_component(ddp)
-    b1 = Button(text='Suspend' if o['status'] == 'Active' else 'Activate', role='secondary-color')
+    b1 = Button(text='Suspend' if o['status'] == 'Active' else 'Activate', icon='fa:ban' if o['status'] == 'Active' else 'fa:check', role='secondary-color')
     b1.set_event_handler('click', partial(self._toggle, o))
     row.add_component(b1)
-    b2 = Button(text='Mark commission paid', role='primary-color')
+    b2 = Button(text='Mark commission paid', icon='fa:money', role='primary-color')
     b2.set_event_handler('click', partial(self._paid, o['name']))
     row.add_component(b2)
-    b3 = Button(text='Send reminder')
+    b3 = Button(text='Send reminder', icon='fa:envelope')
     b3.set_event_handler('click', partial(self._send_reminder, o['name']))
     row.add_component(b3)
-    b4 = Button(text='Delete')
+    b4 = Button(text='Delete', icon='fa:trash')
     b4.set_event_handler('click', partial(self._delete_org, o))
     row.add_component(b4)
     card.add_component(row)
@@ -497,12 +514,13 @@ class Form1(Form1Template):
     if not my_inv:
       self.content.add_component(Label(text='No invoices yet.', foreground='#6b6975'))
     for i in sorted(my_inv, key=lambda i: i['period']):
-      colour = {'Paid': '#1a7f4b', 'Due': '#c2620a', 'Overdue': '#b3372f'}.get(i['status'])
-      c = ColumnPanel(role='card', spacing_below='small')
+      colour = {'Paid': OK_GREEN, 'Due': WARN_ORANGE, 'Overdue': BAD_RED}.get(i['status'])
+      bgi = {'Paid': BG_PAID, 'Due': BG_DUE, 'Overdue': BG_OVERDUE}.get(i['status'])
+      c = ColumnPanel(role='card', spacing_below='small', background=bgi)
       c.add_component(Label(text='%s  -  commission THB %s' % (i['period'], '{:,.0f}'.format(i['commission'])), bold=True))
       c.add_component(Label(text='%s  -  issued %s' % (i['status'], i['issued_str']), foreground=colour))
       if i['status'] in ('Due', 'Overdue'):
-        bp = Button(text='Mark this invoice paid', role='primary-color')
+        bp = Button(text='Mark this invoice paid', icon='fa:money', role='primary-color')
         bp.set_event_handler('click', partial(self._pay_one, i))
         c.add_component(bp)
       self.content.add_component(c)
@@ -550,7 +568,7 @@ class Form1(Form1Template):
     sd = DropDown(items=STATUSES, selected_value=ev['status'])
     sd.set_event_handler('change', partial(self._set_status_detail, ev))
     row.add_component(sd)
-    bdel = Button(text='Delete event')
+    bdel = Button(text='Delete event', icon='fa:trash')
     bdel.set_event_handler('click', partial(self._delete_event, ev))
     row.add_component(bdel)
     self.content.add_component(row)
@@ -574,7 +592,7 @@ class Form1(Form1Template):
     self.tb_evt = TextBox(text=self.evt_search, placeholder='event or organizer')
     self.tb_evt.set_event_handler('pressed_enter', self._evt_search_go)
     bar.add_component(self.tb_evt)
-    b = Button(text='Go')
+    b = Button(text='Go', icon='fa:search')
     b.set_event_handler('click', self._evt_search_go)
     bar.add_component(b)
     bar.add_component(Label(text='  Status:'))
@@ -585,7 +603,7 @@ class Form1(Form1Template):
     dds = DropDown(items=['Date', 'GMV', 'Commission'], selected_value=self.evt_sort)
     dds.set_event_handler('change', self._evt_sort_changed)
     bar.add_component(dds)
-    badd = Button(text='+ Add event', role='primary-color')
+    badd = Button(text='Add event', icon='fa:plus', role='primary-color')
     badd.set_event_handler('click', self._toggle_add_evt)
     bar.add_component(badd)
     self.content.add_component(bar)
@@ -616,7 +634,7 @@ class Form1(Form1Template):
     sd = DropDown(items=STATUSES, selected_value=ev['status'])
     sd.set_event_handler('change', partial(self._set_status, ev))
     row.add_component(sd)
-    bdel = Button(text='Delete')
+    bdel = Button(text='Delete', icon='fa:trash')
     bdel.set_event_handler('click', partial(self._delete_event, ev))
     row.add_component(bdel)
     card.add_component(row)
@@ -645,10 +663,10 @@ class Form1(Form1Template):
     r2.add_component(Label(text='Ticket price (THB):'))
     self.tb_ev_price = TextBox(text='300')
     r2.add_component(self.tb_ev_price)
-    s = Button(text='Save', role='primary-color')
+    s = Button(text='Save', icon='fa:check', role='primary-color')
     s.set_event_handler('click', self._save_new_event)
     r2.add_component(s)
-    c = Button(text='Cancel')
+    c = Button(text='Cancel', icon='fa:times')
     c.set_event_handler('click', self._toggle_add_evt)
     r2.add_component(c)
     box.add_component(r2)
@@ -719,10 +737,10 @@ class Form1(Form1Template):
     bar.add_component(Label(text='Period:'))
     self.dd_period = DropDown(items=['(All periods)'] + self._periods(), selected_value=self.rep_period)
     bar.add_component(self.dd_period)
-    b1 = Button(text='Apply')
+    b1 = Button(text='Apply', icon='fa:filter')
     b1.set_event_handler('click', self._apply)
     bar.add_component(b1)
-    b2 = Button(text='Export CSV', role='primary-color')
+    b2 = Button(text='Export CSV', icon='fa:download', role='primary-color')
     b2.set_event_handler('click', self._export)
     bar.add_component(b2)
     self.content.add_component(bar)
@@ -732,8 +750,9 @@ class Form1(Form1Template):
     npaid = len([r for r in rows if r['status'] == 'Paid'])
     self.content.add_component(Label(text='%d invoice(s)  (%d paid / %d unpaid)   |   GMV THB %s   |   commission total THB %s' % (len(rows), npaid, len(rows) - npaid, '{:,.0f}'.format(tgmv), '{:,.0f}'.format(total)), bold=True, spacing_above='medium'))
     for r in rows:
-      colour = {'Paid': '#1a7f4b', 'Due': '#c2620a', 'Overdue': '#b3372f'}.get(r['status'])
-      card = ColumnPanel(role='card', spacing_below='small')
+      colour = {'Paid': OK_GREEN, 'Due': WARN_ORANGE, 'Overdue': BAD_RED}.get(r['status'])
+      bgr = {'Paid': BG_PAID, 'Due': BG_DUE, 'Overdue': BG_OVERDUE}.get(r['status'])
+      card = ColumnPanel(role='card', spacing_below='small', background=bgr)
       card.add_component(Label(text='%s  -  %s  -  GMV THB %s  -  commission THB %s' % (r['organizer'], r['period'], '{:,.0f}'.format(r['gmv']), '{:,.0f}'.format(r['commission'])), bold=True))
       card.add_component(Label(text='%s  -  issued %s' % (r['status'], r['issued_str']), foreground=colour))
       self.content.add_component(card)
@@ -812,7 +831,7 @@ class Form1(Form1Template):
       n = len([o for o in self.orgs if o['plan'] == plan])
       row.add_component(Label(text='  (%d organizer(s) on this plan)' % n, foreground='#6b6975'))
       box.add_component(row)
-    b = Button(text='Save rates', role='primary-color', spacing_above='small')
+    b = Button(text='Save rates', icon='fa:check', role='primary-color', spacing_above='small')
     b.set_event_handler('click', self._save_rates)
     box.add_component(b)
     self.content.add_component(box)
