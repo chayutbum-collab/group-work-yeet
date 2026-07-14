@@ -1,6 +1,6 @@
 color_scheme:
   colors:
-  - {color: '#f7f8fa', name: Background}
+  - {color: '#f7f8fb', name: Background}
   - {color: '#ffffff', name: Surface}
   - {color: '#1d2430', name: Text}
   - {color: '#667085', name: Muted}
