@@ -18,154 +18,154 @@ _EVENTS = [('E001', 'Sunday Half Marathon', 'Bangkok Runners Club', 4, 12, 320, 
 
 
 def _fmt(m, d):
-  return '%02d %s 2026' % (d, MONTHS[int(m) - 1])
+    return '%02d %s 2026' % (d, MONTHS[int(m) - 1])
 
 
 def _now():
-  n = datetime.datetime.now()
-  return '%02d/%02d/%04d %02d:%02d' % (n.day, n.month, n.year, n.hour, n.minute)
+    n = datetime.datetime.now()
+    return '%02d/%02d/%04d %02d:%02d' % (n.day, n.month, n.year, n.hour, n.minute)
 
 
 class Form1(Form1Template):
 
-  def __init__(self, **properties):
-    super().__init__(**properties)
-    self.audit = []
-    self.plans = dict(PLANS)
-    self.dash_period = '(All periods)'
-    self.evt_filter = '(All statuses)'
-    self.evt_search = ''
-    self.evt_sort = 'Date'
-    self.show_add_evt = False
-    self.org_search = ''
-    self.org_sort = 'GMV'
-    self.show_add_org = False
-    self.detail_org = None
-    self.detail_evt = None
-    self.rep_org = '(All organizers)'
-    self.rep_period = '(All periods)'
-    self.root = self.column_panel_1
-    self._seed_if_empty()
-    self._reload()
-    self._show_login()
+    def __init__(self, **properties):
+        super().__init__(**properties)
+        self.audit = []
+        self.plans = dict(PLANS)
+        self.dash_period = '(All periods)'
+        self.evt_filter = '(All statuses)'
+        self.evt_search = ''
+        self.evt_sort = 'Date'
+        self.show_add_evt = False
+        self.org_search = ''
+        self.org_sort = 'GMV'
+        self.show_add_org = False
+        self.detail_org = None
+        self.detail_evt = None
+        self.rep_org = '(All organizers)'
+        self.rep_period = '(All periods)'
+        self.root = self.column_panel_1
+        self._seed_if_empty()
+        self._reload()
+        self._show_login()
 
-  def _seed_if_empty(self):
-    if len(app_tables.organizers.search()) > 0:
-      return
-    for (name, plan, status) in _ORGS:
-      app_tables.organizers.add_row(name=name, plan=plan, status=status)
-    for (ref, title, org, m, d, part, price) in _EVENTS:
-      app_tables.events.add_row(ref=ref, title=title, organizer=org, month=m, day=d, participants=part, price=price, status='Approved')
-    seen = set()
-    for (ref, title, org, m, d, part, price) in _EVENTS:
-      key = (org, '2026-%02d' % m)
-      if key in seen:
-        continue
-      seen.add(key)
-      st = 'Paid'
-      if m == 6:
-        st = 'Due'
-      if org == 'Indie Game Meetup' and m == 5:
-        st = 'Overdue'
-      app_tables.invoices.add_row(organizer=org, period=key[1], status=st)
+    def _seed_if_empty(self):
+        if len(app_tables.organizers.search()) > 0:
+            return
+        for (name, plan, status) in _ORGS:
+            app_tables.organizers.add_row(name=name, plan=plan, status=status)
+        for (ref, title, org, m, d, part, price) in _EVENTS:
+            app_tables.events.add_row(ref=ref, title=title, organizer=org, month=m, day=d, participants=part, price=price, status='Approved')
+        seen = set()
+        for (ref, title, org, m, d, part, price) in _EVENTS:
+            key = (org, '2026-%02d' % m)
+            if key in seen:
+                continue
+            seen.add(key)
+            st = 'Paid'
+            if m == 6:
+                st = 'Due'
+            if org == 'Indie Game Meetup' and m == 5:
+                st = 'Overdue'
+            app_tables.invoices.add_row(organizer=org, period=key[1], status=st)
 
-  def _reload(self):
-    self.orgs = []
-    for r in app_tables.organizers.search():
-      plan = r['plan']
-      self.orgs.append({'row': r, 'name': r['name'], 'plan': plan, 'rate': self.plans.get(plan, 0.05), 'status': r['status']})
-    self.events = []
-    for r in app_tables.events.search():
-      org = r['organizer']
-      part = r['participants'] or 0
-      price = r['price'] or 0
-      gmv = part * price
-      comm = int(round(gmv * self._rate_of(org)))
-      self.events.append({'row': r, 'ref': r['ref'], 'title': r['title'], 'organizer': org, 'month': r['month'], 'day': r['day'], 'participants': part, 'price': price, 'gmv': gmv, 'commission': comm, 'status': r['status'], 'date_str': _fmt(r['month'], r['day'])})
-    self.invoices = []
-    for r in app_tables.invoices.search():
-      org = r['organizer']
-      period = r['period']
-      evs = [e for e in self.events if e['organizer'] == org and '2026-%02d' % e['month'] == period]
-      self.invoices.append({'row': r, 'organizer': org, 'period': period, 'gmv': sum([e['gmv'] for e in evs]), 'commission': sum([e['commission'] for e in evs]), 'status': r['status'], 'issued_str': _fmt(int(period[5:7]), 28)})
+    def _reload(self):
+        self.orgs = []
+        for r in app_tables.organizers.search():
+            plan = r['plan']
+            self.orgs.append({'row': r, 'name': r['name'], 'plan': plan, 'rate': self.plans.get(plan, 0.05), 'status': r['status']})
+        self.events = []
+        for r in app_tables.events.search():
+            org = r['organizer']
+            part = r['participants'] or 0
+            price = r['price'] or 0
+            gmv = part * price
+            comm = int(round(gmv * self._rate_of(org)))
+            self.events.append({'row': r, 'ref': r['ref'], 'title': r['title'], 'organizer': org, 'month': r['month'], 'day': r['day'], 'participants': part, 'price': price, 'gmv': gmv, 'commission': comm, 'status': r['status'], 'date_str': _fmt(r['month'], r['day'])})
+        self.invoices = []
+        for r in app_tables.invoices.search():
+            org = r['organizer']
+            period = r['period']
+            evs = [e for e in self.events if e['organizer'] == org and '2026-%02d' % e['month'] == period]
+            self.invoices.append({'row': r, 'organizer': org, 'period': period, 'gmv': sum([e['gmv'] for e in evs]), 'commission': sum([e['commission'] for e in evs]), 'status': r['status'], 'issued_str': _fmt(int(period[5:7]), 28)})
 
-  def _refresh(self, page):
-    self._reload()
-    self._show(page)
+    def _refresh(self, page):
+        self._reload()
+        self._show(page)
 
-  def _log(self, action):
-    self.audit.insert(0, {'time': _now(), 'user': USERNAME, 'action': action})
+    def _log(self, action):
+        self.audit.insert(0, {'time': _now(), 'user': USERNAME, 'action': action})
 
-  def _rate_of(self, name):
-    for o in self.orgs:
-      if o['name'] == name:
-        return o['rate']
-    return 0.05
+    def _rate_of(self, name):
+        for o in self.orgs:
+            if o['name'] == name:
+                return o['rate']
+        return 0.05
 
-  def _events_of(self, name):
-    return [e for e in self.events if e['organizer'] == name]
+    def _events_of(self, name):
+        return [e for e in self.events if e['organizer'] == name]
 
-  def _invoices_of(self, name):
-    return [i for i in self.invoices if i['organizer'] == name]
+    def _invoices_of(self, name):
+        return [i for i in self.invoices if i['organizer'] == name]
 
-  def _due_of(self, name):
-    return sum([i['commission'] for i in self._invoices_of(name) if i['status'] in ('Due', 'Overdue')])
+    def _due_of(self, name):
+        return sum([i['commission'] for i in self._invoices_of(name) if i['status'] in ('Due', 'Overdue')])
 
-  def _overdue_of(self, name):
-    return sum([i['commission'] for i in self._invoices_of(name) if i['status'] == 'Overdue'])
+    def _overdue_of(self, name):
+        return sum([i['commission'] for i in self._invoices_of(name) if i['status'] == 'Overdue'])
 
-  def _periods(self):
-    return sorted(set([i['period'] for i in self.invoices]))
+    def _periods(self):
+        return sorted(set([i['period'] for i in self.invoices]))
 
-  def _next_ref(self):
-    n = 1
-    used = set([e['ref'] for e in self.events])
-    while 'E%03d' % n in used:
-      n += 1
-    return 'E%03d' % n
+    def _next_ref(self):
+        n = 1
+        used = set([e['ref'] for e in self.events])
+        while 'E%03d' % n in used:
+            n += 1
+        return 'E%03d' % n
 
-  def _ensure_invoice(self, org, m):
-    period = '2026-%02d' % m
-    row = app_tables.invoices.get(organizer=org, period=period)
-    if row is None:
-      app_tables.invoices.add_row(organizer=org, period=period, status='Due')
+    def _ensure_invoice(self, org, m):
+        period = '2026-%02d' % m
+        row = app_tables.invoices.get(organizer=org, period=period)
+        if row is None:
+            app_tables.invoices.add_row(organizer=org, period=period, status='Due')
 
-  def _show_login(self):
-    self.root.clear()
-    card = ColumnPanel(role='card')
-    card.add_component(Label(text='Owner Console - Staff Login', role='headline'))
-    card.add_component(Label(text='Platform staff only. This console holds every organizer billing data.', foreground='#6b6975', spacing_below='small'))
-    self.tb_user = TextBox(placeholder='Username')
-    self.tb_pass = TextBox(placeholder='Password', hide_text=True)
-    self.tb_pass.set_event_handler('pressed_enter', self._do_login)
-    card.add_component(self.tb_user)
-    card.add_component(self.tb_pass)
-    btn = Button(text='Log in', role='primary-color', spacing_above='small')
-    btn.set_event_handler('click', self._do_login)
-    card.add_component(btn)
-    card.add_component(Label(text='Demo login  ->  username: admin   password: admin123', foreground='#6b6975', spacing_above='small'))
-    self.root.add_component(card)
+    def _show_login(self):
+        self.root.clear()
+        card = ColumnPanel(role='card')
+        card.add_component(Label(text='Owner Console - Staff Login', role='headline'))
+        card.add_component(Label(text='Platform staff only. This console holds every organizer billing data.', foreground='#6b6975', spacing_below='small'))
+        self.tb_user = TextBox(placeholder='Username')
+        self.tb_pass = TextBox(placeholder='Password', hide_text=True)
+        self.tb_pass.set_event_handler('pressed_enter', self._do_login)
+        card.add_component(self.tb_user)
+        card.add_component(self.tb_pass)
+        btn = Button(text='Log in', role='primary-color', spacing_above='small')
+        btn.set_event_handler('click', self._do_login)
+        card.add_component(btn)
+        card.add_component(Label(text='Demo login  ->  username: admin   password: admin123', foreground='#6b6975', spacing_above='small'))
+        self.root.add_component(card)
 
-  def _do_login(self, **e):
-    if self.tb_user.text == USERNAME and self.tb_pass.text == PASSWORD:
-      self._log('Logged in')
-      self._build_console()
-    else:
-      Notification('Wrong username or password.', style='danger').show()
+    def _do_login(self, **e):
+        if self.tb_user.text == USERNAME and self.tb_pass.text == PASSWORD:
+            self._log('Logged in')
+            self._build_console()
+        else:
+            Notification('Wrong username or password.', style='danger').show()
 
-  def _logout(self, **e):
-    self._log('Logged out')
-    self._show_login()
+    def _logout(self, **e):
+        self._log('Logged out')
+        self._show_login()
 
-  def _build_console(self):
-    self.root.clear()
-    self.nav = FlowPanel(align='left', spacing_below='medium')
-    self.root.add_component(self.nav)
-    self.crumb = Label(foreground='#6b6975', spacing_below='small')
-    self.root.add_component(self.crumb)
-    self.content = ColumnPanel()
-    self.root.add_component(self.content)
-    self._refresh('Dashboard')
+    def _build_console(self):
+        self.root.clear()
+        self.nav = FlowPanel(align='left', spacing_below='medium')
+        self.root.add_component(self.nav)
+        self.crumb = Label(foreground='#6b6975', spacing_below='small')
+        self.root.add_component(self.crumb)
+        self.content = ColumnPanel()
+        self.root.add_component(self.content)
+        self._refresh('Dashboard')
 
     def _draw_nav(self, current):
         self.nav.clear()
