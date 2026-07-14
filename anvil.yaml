@@ -1,6 +1,6 @@
 allow_embedding: false
-name: Minimal Theme 3
-package_name: Minimal_Theme_3
+name: Group work
+package_name: Group_work
 runtime_options:
   client_version: '3'
   server_spec: {base: python310-minimal}
