@@ -1,4 +1,79 @@
 allow_embedding: false
+db_schema:
+  events:
+    client: full
+    columns:
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: ref
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: title
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: organizer
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: month
+      type: number
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: day
+      type: number
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: participants
+      type: number
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: price
+      type: number
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: status
+      type: string
+    indexes: []
+    server: full
+    title: events
+  invoices:
+    client: full
+    columns:
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: organizer
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: period
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: status
+      type: string
+    indexes: []
+    server: full
+    title: invoices
+  organizers:
+    client: full
+    columns:
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: name
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: plan
+      type: string
+    - admin_ui: {width: 200}
+      client_hidden: false
+      name: status
+      type: string
+    indexes: []
+    server: full
+    title: organizers
 name: Group work
 package_name: Group_work
 runtime_options:

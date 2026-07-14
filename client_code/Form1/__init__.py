@@ -1,5 +1,8 @@
 from ._anvil_designer import Form1Template
 from anvil import *
+import anvil.tables as tables
+import anvil.tables.query as q
+from anvil.tables import app_tables
 from functools import partial
 import anvil.media
 import anvil.tables as tables
@@ -89,7 +92,7 @@ class Form1(Form1Template):
             evs = [e for e in self.events if e['organizer'] == org and '2026-%02d' % e['month'] == period]
             self.invoices.append({'row': r, 'organizer': org, 'period': period, 'gmv': sum([e['gmv'] for e in evs]), 'commission': sum([e['commission'] for e in evs]), 'status': r['status'], 'issued_str': _fmt(int(period[5:7]), 28)})
 
-    def _refresh(self, page):
+    def _refresh(self, page, **e):
         self._reload()
         self._show(page)
 
