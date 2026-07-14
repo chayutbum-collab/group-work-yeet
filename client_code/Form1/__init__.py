@@ -18,6 +18,7 @@ WARN_ORANGE = '#c2620a'
 BG_PAID = '#eaf6ee'
 BG_DUE = '#fdf3e6'
 BG_OVERDUE = '#fdeaea'
+TITLE_SIZE = 28
 NAV_PAGES = ['Dashboard', 'Organizers', 'Events', 'Reports', 'Audit log', 'Settings']
 ICONS = {'Dashboard': 'fa:dashboard', 'Organizers': 'fa:users', 'Events': 'fa:calendar', 'Reports': 'fa:file-text-o', 'Audit log': 'fa:history', 'Settings': 'fa:cog'}
 _ORGS = [('Bangkok Runners Club', 'Pro', 'Active'), ('MUIC Music Society', 'Free', 'Active'), ('TechConf Asia', 'Business', 'Active'), ('Chiang Mai Food Fest', 'Pro', 'Active'), ('Indie Game Meetup', 'Free', 'Suspended')]
@@ -137,7 +138,7 @@ class Form1(Form1Template):
   def _show_login(self):
     self.root.clear()
     card = ColumnPanel(role='card')
-    card.add_component(Label(text='Owner Console - Staff Login', role='headline'))
+    card.add_component(Label(text='Owner Console - Staff Login', role='headline', font_size=TITLE_SIZE, bold=True))
     card.add_component(Label(text='Platform staff only. This console holds every organizer billing data.', foreground='#6b6975', spacing_below='small'))
     self.tb_user = TextBox(placeholder='Username')
     self.tb_pass = TextBox(placeholder='Password', hide_text=True)
@@ -165,8 +166,6 @@ class Form1(Form1Template):
     self.root.clear()
     self.nav = FlowPanel(align='left', spacing_below='medium')
     self.root.add_component(self.nav)
-    self.crumb = Label(foreground='#6b6975', spacing_below='small')
-    self.root.add_component(self.crumb)
     self.content = ColumnPanel()
     self.root.add_component(self.content)
     self._refresh('Dashboard')
@@ -193,8 +192,6 @@ class Form1(Form1Template):
     if page == 'EvtDetail':
       nav_for = 'Events'
     self._draw_nav(nav_for)
-    crumbs = {'Dashboard': 'Home / Dashboard', 'Organizers': 'Home / Organizers', 'OrgDetail': 'Home / Organizers / ' + str(self.detail_org), 'Events': 'Home / Events', 'EvtDetail': 'Home / Events / ' + str(self.detail_evt), 'Reports': 'Home / Reports and export', 'Audit log': 'Home / Audit log', 'Settings': 'Home / Settings'}
-    self.crumb.text = crumbs.get(page, '')
     self.content.clear()
     pages = {'Dashboard': self._dashboard, 'Organizers': self._organizers, 'OrgDetail': self._org_detail, 'Events': self._events, 'EvtDetail': self._evt_detail, 'Reports': self._reports, 'Audit log': self._audit_page, 'Settings': self._settings_page}
     pages[page]()
@@ -204,7 +201,7 @@ class Form1(Form1Template):
     self._show('Dashboard')
 
   def _dashboard(self):
-    self.content.add_component(Label(text='Event Platform - Owner Console', role='headline'))
+    self.content.add_component(Label(text='Event Platform - Owner Console', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Billing and commission across every organizer', foreground='#6b6975'))
     bar = FlowPanel(align='left', spacing_below='medium')
     bar.add_component(Label(text='Period:'))
@@ -248,7 +245,7 @@ class Form1(Form1Template):
       rowp = FlowPanel(align='left')
       for (cap, val) in items:
         c = ColumnPanel(role='card')
-        c.add_component(Label(text=val, font_size=22, bold=True, foreground=THEME))
+        c.add_component(Label(text=val, font_size=24, bold=True, foreground=THEME))
         c.add_component(Label(text=cap, foreground='#6b6975'))
         rowp.add_component(c)
       self.content.add_component(rowp)
@@ -280,7 +277,7 @@ class Form1(Form1Template):
       pass
 
   def _organizers(self):
-    self.content.add_component(Label(text='Organizers', role='headline'))
+    self.content.add_component(Label(text='Organizers', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Click an organizer name to open its detail page', foreground='#6b6975'))
     bar = FlowPanel(align='left', spacing_below='medium')
     bar.add_component(Label(text='Search:'))
@@ -484,7 +481,7 @@ class Form1(Form1Template):
     back = Link(text='< Back to organizers')
     back.set_event_handler('click', partial(self._show, 'Organizers'))
     self.content.add_component(back)
-    self.content.add_component(Label(text=org['name'], role='headline'))
+    self.content.add_component(Label(text=org['name'], role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='%s plan  -  %.0f%% commission  -  %s' % (org['plan'], org['rate'] * 100, org['status']), foreground='#6b6975', spacing_below='medium'))
     mine = self._events_of(org['name'])
     my_inv = self._invoices_of(org['name'])
@@ -540,7 +537,7 @@ class Form1(Form1Template):
     back = Link(text='< Back to events')
     back.set_event_handler('click', partial(self._show, 'Events'))
     self.content.add_component(back)
-    self.content.add_component(Label(text='%s (%s)' % (ev['title'], ev['ref']), role='headline'))
+    self.content.add_component(Label(text='%s (%s)' % (ev['title'], ev['ref']), role='headline', font_size=TITLE_SIZE, bold=True))
     lk = Link(text='Organizer: %s  >' % ev['organizer'])
     lk.set_event_handler('click', partial(self._open_org, ev['organizer']))
     self.content.add_component(lk)
@@ -585,7 +582,7 @@ class Form1(Form1Template):
     self._refresh('EvtDetail')
 
   def _events(self):
-    self.content.add_component(Label(text='Events oversight', role='headline'))
+    self.content.add_component(Label(text='Events oversight', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Click an event title to open its detail page', foreground='#6b6975'))
     bar = FlowPanel(align='left', spacing_below='medium')
     bar.add_component(Label(text='Search:'))
@@ -727,7 +724,7 @@ class Form1(Form1Template):
     self._refresh('Events')
 
   def _reports(self):
-    self.content.add_component(Label(text='Reports and data export', role='headline'))
+    self.content.add_component(Label(text='Reports and data export', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Commission billing records - filter and export as CSV', foreground='#6b6975'))
     names = sorted(set([o['name'] for o in self.orgs]))
     bar = FlowPanel(align='left')
@@ -807,7 +804,7 @@ class Form1(Form1Template):
     self._download(lines, 'organizers.csv')
 
   def _audit_page(self):
-    self.content.add_component(Label(text='Audit log', role='headline'))
+    self.content.add_component(Label(text='Audit log', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Every action taken in this console, newest first', foreground='#6b6975', spacing_below='medium'))
     if not self.audit:
       self.content.add_component(Label(text='No actions recorded yet.', foreground='#6b6975'))
@@ -818,7 +815,7 @@ class Form1(Form1Template):
       self.content.add_component(card)
 
   def _settings_page(self):
-    self.content.add_component(Label(text='Platform settings', role='headline'))
+    self.content.add_component(Label(text='Platform settings', role='headline', font_size=TITLE_SIZE, bold=True))
     self.content.add_component(Label(text='Commission rate charged on each plan. Changing a rate re-prices every organizer on that plan.', foreground='#6b6975', spacing_below='medium'))
     box = ColumnPanel(role='card')
     self.tb_rates = {}
